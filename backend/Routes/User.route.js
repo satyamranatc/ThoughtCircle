@@ -20,7 +20,17 @@ router.post("/register",async(req,res)=>{
 
 router.post("/login",async(req,res)=>{
 
-    let user = await UserModel.findOne(req.body);
+    let {email,password} = req.body
+
+    let user = await UserModel.findOne({email,password});
+
+    if(!user){
+        return res.json({
+            status:"error",
+            message:"User not found"
+        });
+    }
+
     res.json({
         status:"success",
         data:{

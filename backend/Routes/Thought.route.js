@@ -13,8 +13,10 @@ router.post("/create",async(req,res)=>{
     });
 });
 
-router.get("/list",async(req,res)=>{
+router.get("/list/:id",async(req,res)=>{
     let thoughts = await ThoughtModel.find().populate("thoughtAuthor");
+    // exclude thoughtAuthor
+    thoughts = thoughts.filter(thought=>thought.thoughtAuthor._id.toString() != req.params.id);
     res.json({
         status:"success",
         data:thoughts
