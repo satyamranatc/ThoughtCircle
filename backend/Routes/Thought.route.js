@@ -1,11 +1,12 @@
 import {Router} from "express";
 import ThoughtModel from "../Models/Thought.model.js";
+import authMiddleWare from "../Middlewares/auth.middleware.js";
 
 
 let router = Router();
 
 
-router.post("/create",async(req,res)=>{
+router.post("/create",authMiddleWare,async(req,res)=>{
     let thought = await ThoughtModel.create(req.body);
     res.json({
         status:"success",
@@ -13,7 +14,7 @@ router.post("/create",async(req,res)=>{
     });
 });
 
-router.get("/list/:id",async(req,res)=>{
+router.get("/list/:id",authMiddleWare,async(req,res)=>{
     let thoughts = await ThoughtModel.find().populate("thoughtAuthor");
     // exclude thoughtAuthor
     thoughts = thoughts.filter(thought=>thought.thoughtAuthor._id.toString() != req.params.id);
@@ -24,8 +25,10 @@ router.get("/list/:id",async(req,res)=>{
 });
 
 
-router.get("/listByAuthor/:authorId",async(req,res)=>{
+router.get("/listByAuthor/:authorId",authMiddleWare,async(req,res)=>{
     let thoughts = await ThoughtModel.find({thoughtAuthor:req.params.authorId});
+    console.log(thoughts);
+    
     res.json({
         status:"success",
         data:thoughts.map(thought=>{

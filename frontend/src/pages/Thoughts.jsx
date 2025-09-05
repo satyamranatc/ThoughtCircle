@@ -6,11 +6,17 @@ export default function Thoughts({userLoginData}) {
   let navigate = useNavigate()
   let ViteApiUrl = import.meta.env.VITE_API_URL;
 
+
   let [Thoughts,setThoughts] = useState([])
+  let token = JSON.parse(localStorage.getItem("token"))
 
   useEffect(()=>{
     async function getData() {
-      let {data} = await axios.get(`${ViteApiUrl}/thoughts/list/${userLoginData._id}`)
+      let {data} = await axios.get(`${ViteApiUrl}/thoughts/list/${userLoginData._id}`,{
+        headers: {
+          "Authorization":`Bearer ${token}`
+        }
+      })
       console.log(data.data);
       setThoughts(data.data)
     }
@@ -34,6 +40,10 @@ export default function Thoughts({userLoginData}) {
             let Res = await axios.post(`${ViteApiUrl}/thoughts/create`,{
               ...data,
               "thoughtAuthor":userLoginData._id
+            },{
+              headers: {
+                "Authorization":`Bearer ${token}`
+              }
             })
             if(Res.data.status == "success") {
               alert("Thought Added")

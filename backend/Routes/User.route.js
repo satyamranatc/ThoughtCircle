@@ -1,14 +1,18 @@
 import {Router} from "express";
 import UserModel from "../Models/User.model.js";
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 let router = Router();
 
 
 router.post("/register",async(req,res)=>{
 
-    let user = await UserModel.create(req.body);
+    let {fullName,avatar,email,password} = req.body
+    let user = await UserModel.create({fullName,avatar,email,password : bcrypt.hashSync(password,10)});
     res.json({
         status:"success",
+        token:jwt.sign({_id:user._id},process.env.JWT_SECRET),
         data:{
             "_id":user._id,
             "fullName":user.fullName,
@@ -22,8 +26,9 @@ router.post("/login",async(req,res)=>{
 
     let {email,password} = req.body
 
-    let user = await UserModel.findOne({email,password});
+    let user = await UserModel.findOne({email});
 
+    
     if(!user){
         return res.json({
             status:"error",
@@ -31,8 +36,10 @@ router.post("/login",async(req,res)=>{
         });
     }
 
-    res.json({
+    if(bcrypt.compareSync(password,user.password)){
+        return res.json({
         status:"success",
+        token:jwt.sign({_id:user._id},process.env.JWT_SECRET),
         data:{
             "_id":user._id,
             "fullName":user.fullName,
@@ -40,6 +47,12 @@ router.post("/login",async(req,res)=>{
             "avatar":user.avatar
         }
     });
+    }
+
+     return res.json({
+            status:"error",
+            message:"Invalid Password"
+        });
 })
 
 router.get("/all",async(req,res)=>{
